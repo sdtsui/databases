@@ -24,10 +24,6 @@ module.exports = {
       var queryString = "insert ignore into usernames (username) values ('"
          + req.body['username'] + "');";
       var controllerRes = models.users.post(queryString);
-      // console.log('req.body : ', req.body);
-      // console.log('types, req, req.body, req.body.username', typeof req, typeof req.body, typeof req.body.username, req.body['username']);
-      // console.log('queryString :', queryString);
-      console.log('controllerRes: ', controllerRes);
     }
   }
 };

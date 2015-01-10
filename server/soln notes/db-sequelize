@@ -1,0 +1,42 @@
+var Sequelize = require('Sequelize'); // require sequelize
+var orm = new Sequelize('chat', 'fred', 'fred'); // new connection:
+//db, user, pass
+
+
+
+//Messages Models:
+//
+////
+var User = orm.define('User',
+  {
+    username: Sequelize.STRING
+  });
+//defining tableType, name User, has username property: string
+
+var Message = orm.define('Message', {
+  text: Sequelize.STRING,
+  roomname: Sequelize.STRING
+});
+//defining tabletype, name Message; username properties STRING
+
+
+////
+////
+
+
+User.hasMany(Message); // one-many mapping
+Message.blendsTo(User); //one-one mapping
+  //foreign key for users table, lives in messages table...
+  //ie, message table holds the foreign key of user
+
+
+//Sycnronize
+
+
+//**looikup
+User.sync();
+Message.sync();
+
+exports.User=  User;
+exports.Message = Message;
+

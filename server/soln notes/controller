@@ -1,0 +1,55 @@
+var models = require('../models');
+var bluebird = require('bluebird');
+
+
+
+module.exports = {
+  messages: {
+    get: function (req, res) {
+      console.log('messages GET');
+      Message.findAll({ include: [User]})
+      //performing left outer join by default
+        .complete(function(err, results){
+          res.json(results);
+        });
+      //vs: models.messages.get(cb);
+    }, // a function which handles a get request for all messages
+    post: function (req, res) {
+      console.log('messages POST');
+      //trick used in query string, replacing subquery:
+      //'insert into messages(text, userid, roomname)\
+      // values(?, (select id from users where username = ? limit 1), ? )'
+      // above, in orm.
+      //
+      // sequelize doesn't send in an array, but an object representing all params we want to build
+      var params = {
+        text: req.body[text],
+        username: req.body[username], //need id instead of username; User.findOrCreate({username: req.body[username]})
+                                          //also takes a complete callback; .complete(function(err, user){...code})..all previous code nests INSIDE this
+                                          //to retain access to id property of user
+        roomname: req.body[roomname]
+      };
+      Message.create(params)
+        .complete(function(err,results){
+          res.sendStatus(201);
+        });
+
+    } // a function which handles posting a message to the database
+  },
+
+  users: {
+    // Ditto as above
+    get: function (req, res) {
+      console.log('users GET');
+
+    },
+    post: function (req, res) {
+      var queryString = "insert ignore into usernames (username) values ('"
+         + req.body['username'] + "');";
+      models.users.post(queryString, function(){
+        //writeHead, Default headers
+      });
+    }
+  }
+};
+
