@@ -12,13 +12,13 @@ USE chat;
 -- users and IDs
 -- ---
 
-DROP TABLE IF EXISTS `username`;
+-- DROP TABLE IF EXISTS `username`;
 
-CREATE TABLE `username` (
-  `id` INTEGER(10) NULL,
-  `username` VARCHAR(20) NULL,
-  PRIMARY KEY (`id`)
-) COMMENT 'users and IDs';
+-- CREATE TABLE `username` (
+--   `id` INTEGER(10) NULL,
+--   `username` VARCHAR(20) NULL,
+--   PRIMARY KEY (`id`)
+-- ) COMMENT 'users and IDs';
 
 -- ---
 -- Table 'messages'
@@ -29,10 +29,20 @@ DROP TABLE IF EXISTS `messages`;
 
 CREATE TABLE `messages` (
   `id` INTEGER(10) NULL,
-  `u_id` INTEGER(10) NULL DEFAULT NULL,
+  `username` VARCHAR(20) NULL,
   `message` VARCHAR(144) NULL,
   `roomname` VARCHAR(20) NULL DEFAULT NULL
 ) COMMENT 'holds: id, message, room, u_id';
+
+
+--old schema
+-- CREATE TABLE `messages` (
+--   `id` INTEGER(10) NULL,
+--   `u_id` INTEGER(10) NULL DEFAULT NULL,
+--   `message` VARCHAR(144) NULL,
+--   `roomname` VARCHAR(20) NULL DEFAULT NULL
+-- ) COMMENT 'holds: id, message, room, u_id';
+
 
 -- ---
 -- Foreign Keys
