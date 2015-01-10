@@ -5,30 +5,44 @@ var mysql = require('mysql');
 var request = require("request"); // You might need to npm install the request module!
 var expect = require('../../node_modules/chai/chai').expect;
 
+console.log('requirements');
+
+
 describe("Persistent Node Chat Server", function() {
   var dbConnection;
-
+  console.log('persistent node server described')
   beforeEach(function(done) {
     dbConnection = mysql.createConnection({
       user: "root",
       password: "",
       database: "chat"
     });
+    console.log('about to connect to dbConnection');
     dbConnection.connect();
+    console.log('connected to dbConnection');
 
-       var tablename = "messages"; // TODO: fill this out
+
+       var messageTable = "messages"; // TODO: fill this out
+       var userTable = "usernames";
 
     /* Empty the db table before each test so that multiple tests
      * (or repeated runs of the tests) won't screw each other up: */
-    dbConnection.query("truncate " + tablename, done);
+     // console.log('Here is done: ', done);
+    dbConnection.query("truncate " + userTable);
+    dbConnection.query("truncate " + messageTable, done);
+    // dbConnection.query("truncate " + userTable, done);
+    // disabling this line so done is not called multiple times;
+    // note that future tests that examine the users table may fail
   });
 
   afterEach(function() {
     dbConnection.end();
+    console.log('dbConnection, end');
   });
 
   it("Should insert posted messages to the DB", function(done) {
     // Post the user to the chat server.
+    console.log('first POST incoming;');
     request({ method: "POST",
               uri: "http://127.0.0.1:3000/classes/users",
               json: { username: "Valjean" }
@@ -50,7 +64,25 @@ describe("Persistent Node Chat Server", function() {
         var queryString = "SELECT * FROM messages";
         var queryArgs = [];
 
+        var queryStringU = "SELECT * FROM messages";
+        var queryArgsU = [];
+
+
+        //Username Insert Test:
+        //
+        dbConnection.query(queryStringU, queryArgsU, function(err, results) {
+          console.log('UserName Query Result: ', results);
+          // Should have one result:
+          expect(results.length).to.equal(1);
+
+          // TODO: If you don't have a column named text, change this test.
+          expect(results[0].message).to.equal("In mercy's name, three days is all I need.");
+
+          done();
+        });
+
         dbConnection.query(queryString, queryArgs, function(err, results) {
+          console.log('Messages Query Result: ', results);
           // Should have one result:
           expect(results.length).to.equal(1);
 

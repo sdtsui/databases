@@ -11,4 +11,8 @@ var authParams = {
       database: "chat"
     };
 
-module.exports.connection = mysql.createConnection;
+var db = mysql.createConnection(authParams);
+
+db.connect(function(err){if(err) throw err;});
+
+module.exports.db = db;
