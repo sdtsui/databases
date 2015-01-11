@@ -5,48 +5,36 @@ var mysql = require('mysql');
 var request = require("request"); // You might need to npm install the request module!
 var expect = require('../../node_modules/chai/chai').expect;
 
-console.log('requirements');
-
-
 describe("Persistent Node Chat Server", function() {
   var dbConnection;
-  console.log('persistent node server described')
+
   beforeEach(function(done) {
     dbConnection = mysql.createConnection({
       user: "root",
       password: "",
       database: "chat"
     });
-    console.log('about to connect to dbConnection');
     dbConnection.connect();
-    console.log('connected to dbConnection');
 
-
-       var messageTable = "messages"; // TODO: fill this out
-       var userTable = "usernames";
+       var tablename = "messages"; // TODO: fill this out
 
     /* Empty the db table before each test so that multiple tests
      * (or repeated runs of the tests) won't screw each other up: */
-     // console.log('Here is done: ', done);
-    dbConnection.query("truncate " + userTable);
-    dbConnection.query("truncate " + messageTable, done);
-    // dbConnection.query("truncate " + userTable, done);
-    // disabling this line so done is not called multiple times;
-    // note that future tests that examine the users table may fail
+    dbConnection.query("truncate " + tablename, done);
   });
 
   afterEach(function() {
     dbConnection.end();
-    console.log('dbConnection, end');
   });
 
   it("Should insert posted messages to the DB", function(done) {
+    console.log('calling first test cb');
     // Post the user to the chat server.
-    console.log('first POST incoming;');
     request({ method: "POST",
               uri: "http://127.0.0.1:3000/classes/users",
               json: { username: "Valjean" }
     }, function () {
+      console.log('calling 2nd test cb');
       // Post a message to the node chat server:
       request({ method: "POST",
               uri: "http://127.0.0.1:3000/classes/messages",
@@ -56,6 +44,8 @@ describe("Persistent Node Chat Server", function() {
                 roomname: "Hello"
               }
       }, function () {
+      console.log('calling 3rd test cb');
+
         // Now if we look in the database, we should find the
         // posted message there.
 
@@ -64,30 +54,13 @@ describe("Persistent Node Chat Server", function() {
         var queryString = "SELECT * FROM messages";
         var queryArgs = [];
 
-        var queryStringU = "SELECT * FROM messages";
-        var queryArgsU = [];
-
-
-        //Username Insert Test:
-        //
-        dbConnection.query(queryStringU, queryArgsU, function(err, results) {
-          console.log('UserName Query Result: ', results);
-          // Should have one result:
-          expect(results.length).to.equal(1);
-
-          // TODO: If you don't have a column named text, change this test.
-          expect(results[0].message).to.equal("In mercy's name, three days is all I need.");
-
-          done();
-        });
-
         dbConnection.query(queryString, queryArgs, function(err, results) {
-          console.log('Messages Query Result: ', results);
           // Should have one result:
+          console.log(err, results);
           expect(results.length).to.equal(1);
 
           // TODO: If you don't have a column named text, change this test.
-          expect(results[0].message).to.equal("In mercy's name, three days is all I need.");
+          expect(results[0].message).to.equal("In mercy\'s name, three days is all I need.");
 
           done();
         });
@@ -97,8 +70,9 @@ describe("Persistent Node Chat Server", function() {
 
   it("Should output all messages from the DB", function(done) {
     // Let's insert a message into the db
-       var queryString = "";
-       var queryArgs = [];
+       var queryString = "insert into messages(message, u_id, roomname)\
+                          values(?, ?, ?);";
+       var queryArgs = ['Men like you can never change!', '1', 'lobby'];
     // TODO - The exact query string and query args to use
     // here depend on the schema you design, so I'll leave
     // them up to you. */
@@ -108,10 +82,12 @@ describe("Persistent Node Chat Server", function() {
 
       // Now query the Node chat server and see if it returns
       // the message we just inserted:
+      console.log('sending GET  req to: \"http://127.0.0.1:3000/classes/messages\"')
       request("http://127.0.0.1:3000/classes/messages", function(error, response, body) {
         var messageLog = JSON.parse(body);
-        expect(messageLog[0].text).to.equal("Men like you can never change!");
-        expect(messageLog[0].roomname).to.equal("main");
+        console.log(messageLog);
+        expect(messageLog[0].message).to.equal("Men like you can never change!");
+        expect(messageLog[0].roomname).to.equal("lobby");
         done();
       });
     });

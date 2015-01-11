@@ -12,9 +12,9 @@ USE chat;
 -- users and IDs
 -- ---
 
-DROP TABLE IF EXISTS `username`;
+DROP TABLE IF EXISTS `users`;
 
-CREATE TABLE `usernames` (
+CREATE TABLE `users` (
   `id` INTEGER NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(20) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
